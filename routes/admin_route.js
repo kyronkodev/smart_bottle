@@ -6,8 +6,6 @@ const db = require('../config/database');
 /* GET admin page - 아기 관리 대시보드 */
 router.get("/", async function (req, res, next) {
     try {
-        const baby_id = req.query.baby_id || null;
-
         // 1. 모든 아기 목록 가져오기
         const babiesQuery = `
             SELECT
@@ -27,7 +25,13 @@ router.get("/", async function (req, res, next) {
         `;
         const [babies] = await db.execute(babiesQuery);
 
-        // 2. 선택된 아기가 있으면 상세 정보 가져오기
+        // 2. baby_id가 없으면 첫 번째 아기를 자동 선택
+        let baby_id = req.query.baby_id;
+        if (!baby_id && babies.length > 0) {
+            baby_id = babies[0].baby_id;
+        }
+
+        // 3. 선택된 아기가 있으면 상세 정보 가져오기
         let selectedBaby = null;
         let babyDevices = [];
         let todayRecord = null;
@@ -59,8 +63,6 @@ router.get("/", async function (req, res, next) {
             `;
             const [todayRecords] = await db.execute(todayQuery, [selectedBaby.baby_id]);
             todayRecord = todayRecords[0] || null;
-        } else if (babies.length > 0) {
-            selectedBaby = babies[0];
         }
 
         res.render("admin/index", {
