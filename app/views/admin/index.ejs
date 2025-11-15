@@ -1,4 +1,689 @@
-<div class="admin-container">
-    <h1>Smart Bottle Admin Dashboard</h1>
-    <p>관리자 페이지</p>
-</div>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <style>
+        /* Design System - Yonsei Blue Based */
+        :root {
+            /* Primary Colors */
+            --primary: #003876;
+            --primary-light: #0052A3;
+            --primary-lighter: #E8F1F8;
+            --primary-dark: #002855;
+
+            /* Accent Colors */
+            --accent-purple: #667eea;
+            --accent-purple-dark: #764ba2;
+
+            /* Semantic Colors */
+            --success: #22543d;
+            --success-light: #c6f6d5;
+            --warning: #d69e2e;
+            --warning-light: #fefcbf;
+            --error: #c53030;
+            --error-light: #fed7d7;
+
+            /* Neutral Colors */
+            --gray-50: #f8f9fa;
+            --gray-100: #f7fafc;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e0;
+            --gray-400: #a0aec0;
+            --gray-500: #718096;
+            --gray-600: #4a5568;
+            --gray-700: #2d3748;
+            --gray-800: #1a202c;
+
+            /* Spacing System (8px base) */
+            --space-1: 8px;
+            --space-2: 16px;
+            --space-3: 24px;
+            --space-4: 32px;
+            --space-5: 40px;
+            --space-6: 48px;
+
+            /* Typography */
+            --font-base: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+            /* Shadows */
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+
+            /* Border Radius */
+            --radius-sm: 6px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --radius-xl: 16px;
+            --radius-full: 9999px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-base);
+            background: var(--gray-50);
+            color: var(--gray-800);
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            border-bottom: 1px solid var(--gray-200);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: var(--space-2) var(--space-3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+        }
+
+        .logo {
+            font-size: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            background: var(--primary-lighter);
+            border-radius: var(--radius-lg);
+        }
+
+        .header-title h1 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--gray-800);
+            margin-bottom: 2px;
+        }
+
+        .header-title p {
+            font-size: 13px;
+            color: var(--gray-500);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: var(--space-3) var(--space-3);
+        }
+
+        /* Alert */
+        .alert {
+            padding: var(--space-2);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-2);
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+
+        .alert-error {
+            background: var(--error-light);
+            color: var(--error);
+            border: 1px solid #fc8181;
+        }
+
+        .alert-success {
+            background: var(--success-light);
+            color: var(--success);
+            border: 1px solid #48bb78;
+        }
+
+        /* 2-Column Layout */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: var(--space-2);
+            margin-bottom: var(--space-2);
+        }
+
+        .left-column {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-2);
+        }
+
+        /* Baby Selector */
+        .baby-selector {
+            background: white;
+            padding: var(--space-2);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: var(--space-1);
+            color: var(--gray-700);
+        }
+
+        .baby-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-1);
+        }
+
+        .baby-item {
+            padding: var(--space-1) var(--space-2);
+            border: 1.5px solid var(--gray-200);
+            border-radius: var(--radius-md);
+            text-align: left;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: var(--space-1);
+        }
+
+        .baby-item:hover {
+            border-color: var(--primary);
+            background: var(--gray-50);
+        }
+
+        .baby-item.active {
+            border-color: var(--primary);
+            background: var(--primary-lighter);
+        }
+
+        .baby-avatar {
+            font-size: 24px;
+        }
+
+        .baby-info {
+            flex: 1;
+        }
+
+        .baby-name {
+            font-weight: 600;
+            font-size: 13px;
+            margin-bottom: 2px;
+        }
+
+        .baby-age {
+            font-size: 11px;
+            color: var(--gray-500);
+            margin-bottom: 4px;
+        }
+
+        .baby-badges {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+
+        .baby-badge {
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .badge-allergy {
+            background: var(--error-light);
+            color: var(--error);
+        }
+
+        .badge-lactose {
+            background: var(--warning-light);
+            color: #744210;
+        }
+
+        .badge-normal {
+            background: var(--success-light);
+            color: var(--success);
+        }
+
+        /* Health Form */
+        .health-card {
+            background: white;
+            padding: var(--space-2);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .card-title {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: var(--space-2);
+            color: var(--gray-800);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--space-2);
+            margin-bottom: var(--space-2);
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--gray-700);
+        }
+
+        .form-input,
+        .form-textarea {
+            padding: 8px 12px;
+            border: 1.5px solid var(--gray-300);
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        .form-input:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 56, 118, 0.1);
+        }
+
+        .form-input::placeholder,
+        .form-textarea::placeholder {
+            color: var(--gray-400);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 8px var(--space-2);
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: var(--gray-100);
+            color: var(--gray-700);
+            border: 1px solid var(--gray-300);
+        }
+
+        .btn-secondary:hover {
+            background: var(--gray-200);
+        }
+
+        .btn-gradient {
+            background: linear-gradient(135deg, var(--accent-purple) 0%, var(--accent-purple-dark) 100%);
+            color: white;
+            font-size: 14px;
+            padding: 10px var(--space-3);
+        }
+
+        .btn-gradient:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        /* Device Card */
+        .device-card {
+            background: white;
+            padding: var(--space-2);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1.5px solid var(--gray-200);
+            transition: all 0.2s;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .device-card:hover {
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary);
+            background: var(--gray-50);
+        }
+
+        .device-info {
+            flex: 1;
+        }
+
+        .device-info h4 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--gray-800);
+        }
+
+        .device-meta {
+            font-size: 11px;
+            color: var(--gray-500);
+            margin-bottom: 2px;
+        }
+
+        .device-actions {
+            display: flex;
+            align-items: center;
+            gap: var(--space-1);
+        }
+
+        .device-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: var(--radius-full);
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .device-status.online {
+            background: var(--success-light);
+            color: var(--success);
+        }
+
+        .device-status.offline {
+            background: var(--gray-200);
+            color: var(--gray-600);
+        }
+
+        /* Growth Diary Link */
+        .growth-diary-link {
+            background: white;
+            padding: var(--space-2);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            text-align: center;
+        }
+
+        .growth-diary-link p {
+            font-size: 12px;
+            color: var(--gray-600);
+            margin-bottom: var(--space-1);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: var(--space-4);
+            color: var(--gray-500);
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: var(--space-1);
+            opacity: 0.5;
+        }
+
+        .empty-state p {
+            font-size: 13px;
+        }
+
+        /* Utilities */
+        .text-center {
+            text-align: center;
+        }
+
+        .mt-2 {
+            margin-top: var(--space-2);
+        }
+
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <div class="header-left">
+                <div class="logo">🍼</div>
+                <div class="header-title">
+                    <h1>Smart Bottle</h1>
+                    <p>아기 건강 관리 시스템</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <% if (typeof error !== 'undefined' && error) { %>
+            <div class="alert alert-error">
+                <span>⚠️</span>
+                <span><%= error %></span>
+            </div>
+        <% } %>
+
+        <% if (typeof saved !== 'undefined' && saved) { %>
+            <div class="alert alert-success">
+                <span>✅</span>
+                <span>건강 기록이 성공적으로 저장되었습니다!</span>
+            </div>
+        <% } %>
+
+        <% if (selectedBaby) { %>
+        <!-- 2-Column Layout -->
+        <div class="main-grid">
+            <!-- Left Column -->
+            <div class="left-column">
+                <!-- Baby Selector -->
+                <div class="baby-selector">
+                    <h2 class="section-title">아기 선택</h2>
+                    <div class="baby-list">
+                        <% if (babies && babies.length > 0) { %>
+                            <% babies.forEach(baby => { %>
+                                <a href="/admin?baby_id=<%= baby.baby_id %>"
+                                   class="baby-item <%= selectedBaby && selectedBaby.baby_id === baby.baby_id ? 'active' : '' %>">
+                                    <div class="baby-avatar">👶</div>
+                                    <div class="baby-info">
+                                        <div class="baby-name"><%= baby.name %></div>
+                                        <div class="baby-age"><%= baby.age_month %>개월</div>
+                                        <div class="baby-badges">
+                                            <% if (baby.allergy_risk > 0) { %>
+                                                <span class="baby-badge badge-allergy">⚠️ 알레르기 <%= baby.allergy_risk %></span>
+                                            <% } %>
+                                            <% if (baby.lactose_sensitivity > 0) { %>
+                                                <span class="baby-badge badge-lactose">🥛 유당 <%= baby.lactose_sensitivity %></span>
+                                            <% } %>
+                                            <% if (baby.allergy_risk === 0 && baby.lactose_sensitivity === 0) { %>
+                                                <span class="baby-badge badge-normal">✓ 정상</span>
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                </a>
+                            <% }); %>
+                        <% } %>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="growth-diary-link">
+                    <a href="/admin/growth-diary/<%= selectedBaby.baby_id %>" class="btn btn-primary" style="width: 100%; margin-bottom: var(--space-1);">
+                        📖 성장 일기
+                    </a>
+                    <a href="/ai-analysis?baby_id=<%= selectedBaby.baby_id %>" class="btn btn-primary" style="width: 100%;">
+                        🤖 AI 리포트
+                    </a>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <!-- Health Record Form -->
+            <div class="health-card">
+                <h2 class="card-title">📝 오늘의 건강 기록 - <%= selectedBaby.name %></h2>
+                <form action="/admin/health-record" method="POST">
+                    <input type="hidden" name="baby_id" value="<%= selectedBaby.baby_id %>">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label" for="height_cm">신장 (cm)</label>
+                            <input class="form-input" type="number" step="0.1" id="height_cm" name="height_cm"
+                                   value="<%= todayRecord ? todayRecord.height_cm : selectedBaby.current_height_cm || '' %>"
+                                   placeholder="62.5">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="weight_kg">체중 (kg)</label>
+                            <input class="form-input" type="number" step="0.01" id="weight_kg" name="weight_kg"
+                                   value="<%= todayRecord ? todayRecord.weight_kg : selectedBaby.current_weight_kg || '' %>"
+                                   placeholder="6.8">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="head_circumference_cm">머리둘레 (cm)</label>
+                            <input class="form-input" type="number" step="0.1" id="head_circumference_cm" name="head_circumference_cm"
+                                   value="<%= todayRecord ? todayRecord.head_circumference_cm : '' %>"
+                                   placeholder="42.0">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="temperature">체온 (°C)</label>
+                            <input class="form-input" type="number" step="0.1" id="temperature" name="temperature"
+                                   value="<%= todayRecord ? todayRecord.temperature : '' %>"
+                                   placeholder="36.5">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="notes">메모</label>
+                        <textarea class="form-textarea" id="notes" name="notes" rows="3"
+                                  placeholder="오늘의 특이사항을 기록해주세요"><%= todayRecord ? todayRecord.notes : '' %></textarea>
+                    </div>
+
+                    <div class="text-center mt-2">
+                        <button type="submit" class="btn btn-gradient">💾 건강 기록 저장</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Device Section (Full Width) -->
+        <div class="health-card">
+            <h2 class="card-title">🔌 연결된 기기</h2>
+            <% if (babyDevices && babyDevices.length > 0) { %>
+                <% babyDevices.forEach(device => { %>
+                    <div class="device-card" onclick="location.href='/devices/<%= device.device_id %>/dashboard'">
+                        <div class="device-info">
+                            <h4><%= device.device_name || 'Smart Bottle' %></h4>
+                            <div class="device-meta">UUID: <%= device.device_uuid %></div>
+                            <div class="device-meta">병 무게: <%= device.bottle_weight || '0' %>g</div>
+                            <% if (device.last_connected) { %>
+                                <div class="device-meta">마지막 연결: <%= new Date(device.last_connected).toLocaleString('ko-KR') %></div>
+                            <% } %>
+                        </div>
+                        <div class="device-actions">
+                            <span class="device-status <%= device.is_online ? 'online' : 'offline' %>">
+                                <%= device.is_online ? '● 온라인' : '○ 오프라인' %>
+                            </span>
+                            <a href="/admin/devices/<%= device.device_id %>/edit"
+                               class="btn btn-secondary btn-small"
+                               onclick="event.stopPropagation();">
+                                ✏️ 수정
+                            </a>
+                        </div>
+                    </div>
+                <% }); %>
+            <% } else { %>
+                <div class="empty-state">
+                    <div class="empty-state-icon">🔌</div>
+                    <p>연결된 기기가 없습니다</p>
+                </div>
+            <% } %>
+        </div>
+        <% } else { %>
+        <!-- No Baby Selected -->
+        <div class="baby-selector">
+            <h2 class="section-title">아기 선택</h2>
+            <div class="baby-list">
+                <% if (babies && babies.length > 0) { %>
+                    <% babies.forEach(baby => { %>
+                        <a href="/admin?baby_id=<%= baby.baby_id %>" class="baby-item">
+                            <div class="baby-avatar">👶</div>
+                            <div class="baby-info">
+                                <div class="baby-name"><%= baby.name %></div>
+                                <div class="baby-age"><%= baby.age_month %>개월</div>
+                                <div class="baby-badges">
+                                    <% if (baby.allergy_risk > 0) { %>
+                                        <span class="baby-badge badge-allergy">⚠️ 알레르기 <%= baby.allergy_risk %></span>
+                                    <% } %>
+                                    <% if (baby.lactose_sensitivity > 0) { %>
+                                        <span class="baby-badge badge-lactose">🥛 유당 <%= baby.lactose_sensitivity %></span>
+                                    <% } %>
+                                    <% if (baby.allergy_risk === 0 && baby.lactose_sensitivity === 0) { %>
+                                        <span class="baby-badge badge-normal">✓ 정상</span>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </a>
+                    <% }); %>
+                <% } else { %>
+                    <div class="empty-state">
+                        <div class="empty-state-icon">👶</div>
+                        <p>등록된 아기가 없습니다</p>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+        <% } %>
+    </div>
+</body>
+</html>

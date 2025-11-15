@@ -55,9 +55,11 @@ const apiRouter = require("./routes/api_route");
 const adminRouter = require("./routes/admin_route");
 const dashboardRouter = require("./routes/dashboard_route");
 const deviceRouter = require("./routes/device_route");
+const aiAnalysisRouter = require("./routes/ai_analysis_route");
 
 app.use("/", indexRouter);
 app.use("/api", apiRouter);
+app.use("/ai-analysis", aiAnalysisRouter);
 app.use("/admin", adminRouter);
 app.use("/dashboard", dashboardRouter);
 app.use("/devices", deviceRouter);

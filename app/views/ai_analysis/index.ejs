@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <style>
+        /* Design System - Yonsei Blue Based */
+        :root {
+            --primary: #003876;
+            --primary-light: #0052A3;
+            --primary-lighter: #E8F1F8;
+            --primary-dark: #002855;
+            --accent-purple: #667eea;
+            --accent-purple-dark: #764ba2;
+            --success: #22543d;
+            --success-light: #c6f6d5;
+            --warning: #d69e2e;
+            --warning-light: #fefcbf;
+            --error: #c53030;
+            --error-light: #fed7d7;
+            --info: #2b6cb0;
+            --info-light: #bee3f8;
+            --gray-50: #f8f9fa;
+            --gray-100: #f7fafc;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e0;
+            --gray-400: #a0aec0;
+            --gray-500: #718096;
+            --gray-600: #4a5568;
+            --gray-700: #2d3748;
+            --gray-800: #1a202c;
+            --space-1: 8px;
+            --space-2: 16px;
+            --space-3: 24px;
+            --space-4: 32px;
+            --font-base: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --radius-xl: 16px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-base);
+            background: var(--gray-50);
+            color: var(--gray-800);
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            border-bottom: 1px solid var(--gray-200);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: var(--space-2) var(--space-3);
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            background: var(--primary-lighter);
+            border-radius: var(--radius-lg);
+            margin-right: var(--space-2);
+        }
+
+        .header-title h1 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--gray-800);
+            margin-bottom: 2px;
+        }
+
+        .header-title p {
+            font-size: 13px;
+            color: var(--gray-500);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: var(--space-3);
+        }
+
+        /* Back Button */
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px var(--space-2);
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 13px;
+            margin-bottom: var(--space-2);
+            transition: all 0.2s;
+        }
+
+        .back-button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Alert */
+        .alert {
+            padding: var(--space-2);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-2);
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-2);
+        }
+
+        .alert-warning {
+            background: var(--warning-light);
+            border: 1.5px solid var(--warning);
+            color: #744210;
+        }
+
+        .alert-error {
+            background: var(--error-light);
+            border: 1.5px solid var(--error);
+            color: var(--error);
+        }
+
+        .alert-icon {
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .alert-content h3 {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .alert-content p {
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        .alert-content a {
+            color: inherit;
+            text-decoration: underline;
+            font-weight: 600;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--space-2);
+            margin-bottom: var(--space-3);
+        }
+
+        .stat-card {
+            background: white;
+            padding: var(--space-2);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            border-left: 3px solid var(--primary);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--gray-500);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+        }
+
+        .stat-unit {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--gray-600);
+        }
+
+        /* Section Card */
+        .section-card {
+            background: white;
+            padding: var(--space-3);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: var(--space-2);
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--gray-800);
+            margin-bottom: var(--space-2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* AI Insights */
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-2);
+        }
+
+        .insight-item {
+            padding: var(--space-2);
+            background: var(--gray-50);
+            border-radius: var(--radius-md);
+            border: 1.5px solid var(--gray-200);
+        }
+
+        .insight-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--gray-600);
+            margin-bottom: 4px;
+        }
+
+        .insight-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        /* Comparison Table */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .comparison-table th {
+            background: var(--gray-50);
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--gray-700);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .comparison-table td {
+            font-size: 14px;
+        }
+
+        .comparison-value {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .comparison-diff {
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+        }
+
+        .diff-positive {
+            background: var(--success-light);
+            color: var(--success);
+        }
+
+        .diff-neutral {
+            background: var(--gray-200);
+            color: var(--gray-700);
+        }
+
+        /* Recommendation Card */
+        .recommendation-card {
+            background: white;
+            border: 1.5px solid var(--gray-200);
+            border-radius: var(--radius-md);
+            padding: var(--space-2);
+            margin-bottom: var(--space-1);
+            transition: all 0.2s;
+        }
+
+        .recommendation-card:hover {
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary);
+        }
+
+        .recommendation-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-1);
+            margin-bottom: var(--space-1);
+        }
+
+        .recommendation-rank {
+            width: 28px;
+            height: 28px;
+            background: var(--accent-purple);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .recommendation-name {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--gray-800);
+        }
+
+        .recommendation-meta {
+            display: flex;
+            gap: var(--space-2);
+            margin-top: 8px;
+            padding-top: var(--space-1);
+        }
+
+        .meta-item {
+            flex: 1;
+        }
+
+        .meta-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--gray-500);
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .meta-value {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--gray-800);
+            padding: 6px 10px;
+            background: var(--gray-50);
+            border-radius: 6px;
+            border-left: 2px solid var(--primary);
+        }
+
+        .compatibility-section {
+            margin-top: var(--space-2);
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+
+        .compatibility-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--gray-600);
+            white-space: nowrap;
+            min-width: 80px;
+        }
+
+        .probability-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .probability-bar {
+            flex: 1;
+            height: 24px;
+            background: var(--gray-100);
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .probability-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-purple), var(--accent-purple-dark));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            color: white;
+            font-weight: 700;
+            font-size: 12px;
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            min-width: 50px;
+        }
+
+        .probability-badge {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .badge-excellent {
+            background: var(--success-light);
+            color: var(--success);
+        }
+
+        .badge-good {
+            background: var(--info-light);
+            color: var(--info);
+        }
+
+        .badge-fair {
+            background: var(--warning-light);
+            color: var(--warning);
+        }
+
+        .badge-low {
+            background: var(--gray-200);
+            color: var(--gray-600);
+        }
+
+        .recommendation-info {
+            margin-bottom: var(--space-2);
+            padding: var(--space-2);
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, #f0f4ff 100%);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--primary-light);
+        }
+
+        .info-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .info-text {
+            font-size: 13px;
+            color: var(--gray-700);
+            line-height: 1.5;
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <div class="logo">🍼</div>
+            <div class="header-title">
+                <h1>Smart Bottle</h1>
+                <p>AI 분석 리포트</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <a href="/admin<% if (baby) { %>?baby_id=<%= baby.baby_id %><% } %>" class="back-button">
+            ← 돌아가기
+        </a>
+
+        <% if (error) { %>
+            <!-- Error Message -->
+            <div class="alert alert-error">
+                <div class="alert-icon">⚠️</div>
+                <div class="alert-content">
+                    <h3>오류 발생</h3>
+                    <p><%= error %></p>
+                </div>
+            </div>
+        <% } else if (!baby) { %>
+            <!-- No Baby -->
+            <div class="alert alert-warning">
+                <div class="alert-icon">👶</div>
+                <div class="alert-content">
+                    <h3>아기 정보 없음</h3>
+                    <p>먼저 아기를 등록해주세요.</p>
+                </div>
+            </div>
+        <% } else if (!hasHealthRecords || !hasFeedingRecords) { %>
+            <!-- Missing Data Warning -->
+            <div class="section-card">
+                <h2 class="section-title">🤖 <%= baby.name %>님의 AI 분석 리포트</h2>
+
+                <% if (!hasHealthRecords) { %>
+                <div class="alert alert-warning">
+                    <div class="alert-icon">📝</div>
+                    <div class="alert-content">
+                        <h3>성장 기록이 필요합니다</h3>
+                        <p>AI 분석을 위해서는 성장 기록(신장, 체중 등)이 필요합니다.</p>
+                        <a href="/admin?baby_id=<%= baby.baby_id %>">성장 기록 입력하기 →</a>
+                    </div>
+                </div>
+                <% } %>
+
+                <% if (!hasFeedingRecords) { %>
+                <div class="alert alert-warning">
+                    <div class="alert-icon">🍼</div>
+                    <div class="alert-content">
+                        <h3>수유 기록이 필요합니다</h3>
+                        <p>AI 분석을 위해서는 수유 기록이 필요합니다. 기기를 통해 수유를 시작하거나 수동으로 기록해주세요.</p>
+                    </div>
+                </div>
+                <% } %>
+            </div>
+        <% } else { %>
+            <!-- Has All Data -->
+
+            <!-- Today's Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">오늘 총 수유량</div>
+                    <div class="stat-value">
+                        <%= Math.round(todayStats.today_total) %>
+                        <span class="stat-unit">ml</span>
+                    </div>
+                </div>
+                <div class="stat-card" style="border-left-color: var(--accent-purple);">
+                    <div class="stat-label">오늘 수유 횟수</div>
+                    <div class="stat-value">
+                        <%= todayStats.today_count %>
+                        <span class="stat-unit">회</span>
+                    </div>
+                </div>
+                <div class="stat-card" style="border-left-color: var(--success);">
+                    <div class="stat-label">온도 준수율</div>
+                    <div class="stat-value">
+                        <%= todayStats.temp_compliance_rate %>
+                        <span class="stat-unit">%</span>
+                    </div>
+                </div>
+                <div class="stat-card" style="border-left-color: var(--info);">
+                    <div class="stat-label">평균 수유량</div>
+                    <div class="stat-value">
+                        <%= Math.round(todayStats.today_avg) %>
+                        <span class="stat-unit">ml</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Insights -->
+            <div class="section-card">
+                <h2 class="section-title">🤖 AI 종합 분석</h2>
+                <div class="insights-grid">
+                    <div class="insight-item">
+                        <div class="insight-label">성장 상태</div>
+                        <div class="insight-value"><%= aiInsights.growth_status %></div>
+                    </div>
+                    <div class="insight-item">
+                        <div class="insight-label">영양 상태</div>
+                        <div class="insight-value"><%= aiInsights.nutrition_status %></div>
+                    </div>
+                    <div class="insight-item">
+                        <div class="insight-label">수유 패턴</div>
+                        <div class="insight-value"><%= aiInsights.feeding_pattern %></div>
+                    </div>
+                </div>
+                <div style="margin-top: var(--space-2); padding: var(--space-2); background: var(--info-light); border-radius: var(--radius-md); border-left: 3px solid var(--info);">
+                    <div style="font-size: 12px; font-weight: 700; color: var(--info); margin-bottom: 4px;">💡 AI 추천</div>
+                    <div style="font-size: 14px; color: var(--gray-800);"><%= aiInsights.recommendation %></div>
+                </div>
+            </div>
+
+            <!-- Peer Comparison -->
+            <div class="section-card">
+                <h2 class="section-title">👥 또래 아기 평균 비교 (<%= peerComparison.age_group %>)</h2>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>항목</th>
+                            <th><%= baby.name %></th>
+                            <th>또래 평균</th>
+                            <th>비교</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>신장</td>
+                            <td class="comparison-value"><%= baby.current_height_cm || '-' %> cm</td>
+                            <td><%= peerComparison.avg_height %> cm</td>
+                            <td>
+                                <% if (baby.current_height_cm) { %>
+                                    <% const heightDiff = baby.current_height_cm - peerComparison.avg_height; %>
+                                    <span class="comparison-diff <%= heightDiff >= 0 ? 'diff-positive' : 'diff-neutral' %>">
+                                        <%= heightDiff >= 0 ? '+' : '' %><%= heightDiff.toFixed(1) %> cm
+                                    </span>
+                                <% } else { %>
+                                    <span class="comparison-diff diff-neutral">-</span>
+                                <% } %>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>체중</td>
+                            <td class="comparison-value"><%= baby.current_weight_kg || '-' %> kg</td>
+                            <td><%= peerComparison.avg_weight %> kg</td>
+                            <td>
+                                <% if (baby.current_weight_kg) { %>
+                                    <% const weightDiff = baby.current_weight_kg - peerComparison.avg_weight; %>
+                                    <span class="comparison-diff <%= weightDiff >= 0 ? 'diff-positive' : 'diff-neutral' %>">
+                                        <%= weightDiff >= 0 ? '+' : '' %><%= weightDiff.toFixed(1) %> kg
+                                    </span>
+                                <% } else { %>
+                                    <span class="comparison-diff diff-neutral">-</span>
+                                <% } %>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>일일 수유량</td>
+                            <td class="comparison-value"><%= Math.round(todayStats.today_total) %> ml</td>
+                            <td><%= peerComparison.avg_daily_intake %> ml</td>
+                            <td>
+                                <% const intakeDiff = todayStats.today_total - peerComparison.avg_daily_intake; %>
+                                <span class="comparison-diff <%= Math.abs(intakeDiff) <= 100 ? 'diff-positive' : 'diff-neutral' %>">
+                                    <%= intakeDiff >= 0 ? '+' : '' %><%= Math.round(intakeDiff) %> ml
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>수유 횟수</td>
+                            <td class="comparison-value"><%= todayStats.today_count %> 회</td>
+                            <td><%= peerComparison.avg_feeding_count %> 회</td>
+                            <td>
+                                <% const countDiff = todayStats.today_count - peerComparison.avg_feeding_count; %>
+                                <span class="comparison-diff <%= Math.abs(countDiff) <= 1 ? 'diff-positive' : 'diff-neutral' %>">
+                                    <%= countDiff >= 0 ? '+' : '' %><%= countDiff %> 회
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Formula Recommendations -->
+            <% if (recommendations && recommendations.length > 0) { %>
+            <div class="section-card">
+                <h2 class="section-title">🎯 AI 맞춤 분유 추천</h2>
+
+                <div class="recommendation-info">
+                    <div class="info-title">💡 추천 시스템</div>
+                    <div class="info-text">
+                        아기의 월령, 체중, 알레르기 위험도, 유당 민감도를 분석하여 최적의 분유를 추천합니다.
+                    </div>
+                </div>
+
+                <% recommendations.forEach((rec, index) => { %>
+                    <div class="recommendation-card">
+                        <div class="recommendation-header">
+                            <div class="recommendation-rank"><%= index + 1 %></div>
+                            <div style="flex: 1;">
+                                <div class="recommendation-name"><%= rec.formula_brand %></div>
+                                <div class="recommendation-meta">
+                                    <div class="meta-item">
+                                        <div class="meta-label">분유 유형</div>
+                                        <div class="meta-value"><%= rec.category %></div>
+                                    </div>
+                                    <div class="meta-item">
+                                        <div class="meta-label">주요 목적</div>
+                                        <div class="meta-value"><%= rec.target_issue %></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="compatibility-section">
+                            <div class="compatibility-label">적합도</div>
+                            <div class="probability-container">
+                                <div class="probability-bar">
+                                    <div class="probability-fill" style="width: <%= (rec.good_probability * 100).toFixed(1) %>%;">
+                                        <%= (rec.good_probability * 100).toFixed(1) %>%
+                                    </div>
+                                </div>
+                                <% const prob = rec.good_probability * 100; %>
+                                <% if (prob >= 80) { %>
+                                    <span class="probability-badge badge-excellent">강력 추천</span>
+                                <% } else if (prob >= 60) { %>
+                                    <span class="probability-badge badge-good">추천</span>
+                                <% } else if (prob >= 40) { %>
+                                    <span class="probability-badge badge-fair">고려</span>
+                                <% } else { %>
+                                    <span class="probability-badge badge-low">신중</span>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
+            <% } %>
+        <% } %>
+    </div>
+</body>
+</html>

@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <style>
+        /* Design System - Yonsei Blue Based */
+        :root {
+            --primary: #003876;
+            --primary-light: #0052A3;
+            --primary-lighter: #E8F1F8;
+            --primary-dark: #002855;
+            --accent-purple: #667eea;
+            --accent-purple-dark: #764ba2;
+            --success: #22543d;
+            --success-light: #c6f6d5;
+            --warning: #d69e2e;
+            --warning-light: #fefcbf;
+            --gray-50: #f8f9fa;
+            --gray-100: #f7fafc;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e0;
+            --gray-400: #a0aec0;
+            --gray-500: #718096;
+            --gray-600: #4a5568;
+            --gray-700: #2d3748;
+            --gray-800: #1a202c;
+            --space-1: 8px;
+            --space-2: 16px;
+            --space-3: 24px;
+            --space-4: 32px;
+            --font-base: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --radius-xl: 16px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-base);
+            background: var(--gray-50);
+            color: var(--gray-800);
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            border-bottom: 1px solid var(--gray-200);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: var(--space-2) var(--space-3);
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            background: var(--primary-lighter);
+            border-radius: var(--radius-lg);
+            margin-right: var(--space-2);
+        }
+
+        .header-title h1 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--gray-800);
+            margin-bottom: 2px;
+        }
+
+        .header-title p {
+            font-size: 13px;
+            color: var(--gray-500);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: var(--space-3);
+        }
+
+        /* Back Button */
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px var(--space-2);
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 13px;
+            margin-bottom: var(--space-2);
+            transition: all 0.2s;
+        }
+
+        .back-button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Baby Info Card */
+        .baby-info-card {
+            background: linear-gradient(135deg, var(--accent-purple) 0%, var(--accent-purple-dark) 100%);
+            color: white;
+            padding: var(--space-3);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--space-2);
+            box-shadow: var(--shadow-md);
+        }
+
+        .baby-info-card h1 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .baby-info-card p {
+            opacity: 0.95;
+            font-size: 14px;
+        }
+
+        /* Section Title */
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--gray-800);
+            margin-bottom: var(--space-2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Record Card */
+        .record-card {
+            background: white;
+            padding: var(--space-2);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-1);
+            box-shadow: var(--shadow-sm);
+            border-left: 3px solid var(--accent-purple);
+            transition: all 0.2s;
+        }
+
+        .record-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-1px);
+        }
+
+        .record-date {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--gray-800);
+            margin-bottom: var(--space-1);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .record-date::before {
+            content: "📅";
+            font-size: 16px;
+        }
+
+        .record-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: var(--space-1);
+            margin-bottom: var(--space-1);
+        }
+
+        .record-item {
+            padding: var(--space-1);
+            background: var(--gray-100);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--gray-200);
+        }
+
+        .record-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--gray-500);
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .record-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .record-notes {
+            margin-top: var(--space-1);
+            padding: var(--space-1);
+            background: #fff5e6;
+            border-radius: var(--radius-md);
+            border-left: 3px solid var(--warning);
+        }
+
+        .record-notes-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--warning);
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .record-notes-label::before {
+            content: "📝";
+        }
+
+        .record-notes-content {
+            font-size: 13px;
+            color: var(--gray-700);
+            line-height: 1.5;
+        }
+
+        .record-timestamp {
+            margin-top: var(--space-1);
+            font-size: 11px;
+            color: var(--gray-400);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .record-timestamp::before {
+            content: "🕐";
+        }
+
+        /* Empty State */
+        .empty-state {
+            background: white;
+            padding: var(--space-4);
+            text-align: center;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: var(--space-1);
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            color: var(--gray-800);
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .empty-state p {
+            color: var(--gray-500);
+            font-size: 14px;
+        }
+
+        .empty-state a {
+            display: inline-block;
+            margin-top: var(--space-2);
+            padding: 8px var(--space-2);
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .empty-state a:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        @media (max-width: 768px) {
+            .record-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .baby-info-card h1 {
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <div class="logo">🍼</div>
+            <div class="header-title">
+                <h1>Smart Bottle</h1>
+                <p>성장 일기</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <a href="/admin?baby_id=<%= baby.baby_id %>" class="back-button">
+            ← 돌아가기
+        </a>
+
+        <!-- Baby Info -->
+        <div class="baby-info-card">
+            <h1>📖 <%= baby.name %>의 성장 일기</h1>
+            <p>
+                <%= baby.gender %> · 생후 <%= baby.age_month %>개월 · 출생 체중 <%= baby.weight_at_birth %>kg
+            </p>
+        </div>
+
+        <h2 class="section-title">최근 건강 기록 (30일)</h2>
+
+        <% if (records && records.length > 0) { %>
+            <% records.forEach(record => { %>
+                <div class="record-card">
+                    <div class="record-date">
+                        <%= new Date(record.record_date).toLocaleDateString('ko-KR', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                            weekday: 'short'
+                        }) %>
+                    </div>
+
+                    <div class="record-grid">
+                        <% if (record.height_cm) { %>
+                            <div class="record-item">
+                                <div class="record-label">신장</div>
+                                <div class="record-value"><%= record.height_cm %> cm</div>
+                            </div>
+                        <% } %>
+
+                        <% if (record.weight_kg) { %>
+                            <div class="record-item">
+                                <div class="record-label">체중</div>
+                                <div class="record-value"><%= record.weight_kg %> kg</div>
+                            </div>
+                        <% } %>
+
+                        <% if (record.head_circumference_cm) { %>
+                            <div class="record-item">
+                                <div class="record-label">머리둘레</div>
+                                <div class="record-value"><%= record.head_circumference_cm %> cm</div>
+                            </div>
+                        <% } %>
+
+                        <% if (record.temperature) { %>
+                            <div class="record-item">
+                                <div class="record-label">체온</div>
+                                <div class="record-value"><%= record.temperature %> °C</div>
+                            </div>
+                        <% } %>
+                    </div>
+
+                    <% if (record.notes) { %>
+                        <div class="record-notes">
+                            <div class="record-notes-label">메모</div>
+                            <div class="record-notes-content"><%= record.notes %></div>
+                        </div>
+                    <% } %>
+
+                    <div class="record-timestamp">
+                        기록 시간: <%= new Date(record.created_at).toLocaleString('ko-KR') %>
+                    </div>
+                </div>
+            <% }); %>
+        <% } else { %>
+            <div class="empty-state">
+                <div class="empty-state-icon">📝</div>
+                <h3>아직 기록이 없습니다</h3>
+                <p>어드민 대시보드에서 첫 건강 기록을 추가해보세요!</p>
+                <a href="/admin?baby_id=<%= baby.baby_id %>">건강 기록 입력하기 →</a>
+            </div>
+        <% } %>
+    </div>
+</body>
+</html>
