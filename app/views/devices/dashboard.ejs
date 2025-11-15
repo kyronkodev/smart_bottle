@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - Smart Bottle</title>
+  <link rel="stylesheet" href="/assets/css/dashboard.css">
+  <script src="/socket.io/socket.io.js"></script>
+  <style>
+    .dashboard-container { max-width: 1400px; margin: 0 auto; padding: var(--spacing-8); }
+    .dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-8); }
+    .dashboard-title { font-size: var(--font-size-3xl); font-weight: var(--font-weight-bold); color: var(--color-text-primary); }
+    .back-btn { background: var(--color-gray-100); color: var(--color-text-secondary); padding: var(--spacing-3) var(--spacing-6); border-radius: var(--radius-md); border: none; font-weight: var(--font-weight-medium); cursor: pointer; transition: all var(--transition-base); text-decoration: none; }
+    .back-btn:hover { background: var(--color-gray-200); }
+
+    /* 수유 상태 카드 */
+    .feeding-status-card { background: var(--color-white); border-radius: var(--radius-2xl); padding: var(--spacing-8); box-shadow: var(--shadow-md); margin-bottom: var(--spacing-6); }
+    .status-header { text-align: center; margin-bottom: var(--spacing-6); }
+    .status-icon { font-size: 80px; margin-bottom: var(--spacing-4); }
+    .status-title { font-size: var(--font-size-3xl); font-weight: var(--font-weight-bold); color: var(--color-text-primary); margin-bottom: var(--spacing-2); }
+    .status-desc { font-size: var(--font-size-lg); color: var(--color-text-secondary); }
+
+    /* 상태별 색상 */
+    .status-idle { color: var(--color-text-tertiary); }
+    .status-ready { color: var(--color-warning); animation: pulse 2s ease-in-out infinite; }
+    .status-feeding { color: var(--color-primary); animation: pulse 1.5s ease-in-out infinite; }
+    .status-completed { color: var(--color-success); }
+
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+
+    /* 측정 데이터 그리드 */
+    .data-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--spacing-4); margin-top: var(--spacing-6); }
+    .data-item { background: var(--color-gray-50); padding: var(--spacing-4); border-radius: var(--radius-lg); text-align: center; }
+    .data-label { font-size: var(--font-size-sm); color: var(--color-text-secondary); margin-bottom: var(--spacing-2); }
+    .data-value { font-size: var(--font-size-2xl); font-weight: var(--font-weight-bold); color: var(--color-text-primary); }
+    .data-unit { font-size: var(--font-size-base); color: var(--color-text-tertiary); margin-left: var(--spacing-1); }
+
+    /* 온도 안전 표시 */
+    .temp-safe { color: var(--color-success); }
+    .temp-unsafe { color: var(--color-error); animation: blink 1s ease-in-out infinite; }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+    /* 연결 상태 */
+    .connection-status { display: inline-flex; align-items: center; gap: var(--spacing-2); padding: var(--spacing-2) var(--spacing-4); border-radius: var(--radius-full); font-size: var(--font-size-sm); }
+    .connection-online { background: var(--color-success-lighter); color: var(--color-success); }
+    .connection-offline { background: var(--color-gray-100); color: var(--color-text-tertiary); }
+    .connection-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; animation: pulse-dot 2s ease-in-out infinite; }
+    @keyframes pulse-dot { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.8); } }
+
+    /* 프로그레스 바 */
+    .progress-container { background: var(--color-gray-100); border-radius: var(--radius-full); height: 8px; margin-top: var(--spacing-4); overflow: hidden; }
+    .progress-bar { height: 100%; background: linear-gradient(90deg, var(--color-primary), var(--color-primary-light)); transition: width 0.5s ease; }
+
+    /* 실시간 로그 */
+    .log-container { background: var(--color-white); border-radius: var(--radius-2xl); padding: var(--spacing-6); box-shadow: var(--shadow-sm); max-height: 400px; overflow-y: auto; }
+    .log-title { font-size: var(--font-size-xl); font-weight: var(--font-weight-semibold); margin-bottom: var(--spacing-4); }
+    .log-item { padding: var(--spacing-3); border-left: 3px solid var(--color-primary-lighter); background: var(--color-gray-50); margin-bottom: var(--spacing-2); border-radius: var(--radius-md); font-size: var(--font-size-sm); }
+    .log-time { color: var(--color-text-tertiary); font-size: var(--font-size-xs); }
+    .log-message { color: var(--color-text-primary); margin-top: var(--spacing-1); }
+
+    /* 수유 기록 테이블 */
+    .feeding-records-table { width: 100%; border-collapse: collapse; font-size: var(--font-size-sm); }
+    .feeding-records-table thead tr { background: var(--color-gray-50); }
+    .feeding-records-table th { padding: var(--spacing-3); border-bottom: 2px solid var(--color-gray-200); text-align: left; font-weight: var(--font-weight-semibold); color: var(--color-text-secondary); }
+    .feeding-records-table tbody tr { border-bottom: 1px solid var(--color-gray-100); transition: background var(--transition-base); }
+    .feeding-records-table tbody tr:hover { background: var(--color-gray-50); }
+    .feeding-records-table td { padding: var(--spacing-3); }
+  </style>
+</head>
+<body>
+  <div class="dashboard-container">
+    <!-- 헤더 -->
+    <div class="dashboard-header">
+      <div>
+        <h1 class="dashboard-title">🍼 <%= device.device_name %></h1>
+        <div style="margin-top: var(--spacing-2);">
+          <span class="connection-status connection-offline" id="connectionStatus">
+            <span class="connection-dot"></span>
+            연결 대기 중
+          </span>
+        </div>
+      </div>
+      <a href="/devices" class="back-btn">← 기기 목록</a>
+    </div>
+
+    <!-- 수유 상태 카드 -->
+    <div class="feeding-status-card">
+      <div class="status-header">
+        <div class="status-icon" id="statusIcon">💤</div>
+        <h2 class="status-title" id="statusTitle">대기 중</h2>
+        <p class="status-desc" id="statusDesc">젖병을 무게 센서에 올려주세요</p>
+      </div>
+
+      <!-- 측정 데이터 -->
+      <div class="data-grid">
+        <div class="data-item">
+          <div class="data-label">초기 분유량</div>
+          <div class="data-value">
+            <span id="beforeWeight">-</span>
+            <span class="data-unit">g</span>
+          </div>
+        </div>
+        <div class="data-item">
+          <div class="data-label">마지막 분유량</div>
+          <div class="data-value">
+            <span id="afterWeight">-</span>
+            <span class="data-unit">g</span>
+          </div>
+        </div>
+        <div class="data-item">
+          <div class="data-label">총 마신 양</div>
+          <div class="data-value">
+            <span id="consumedAmount" style="color: var(--color-primary);">-</span>
+            <span class="data-unit">ml</span>
+          </div>
+          <div style="margin-top: var(--spacing-1); font-size: var(--font-size-xs); color: var(--color-text-tertiary);">
+            <span id="consumedCalc">-</span>
+          </div>
+        </div>
+        <div class="data-item">
+          <div class="data-label">온도</div>
+          <div class="data-value">
+            <span id="temperature">-</span>
+            <span class="data-unit">°C</span>
+          </div>
+        </div>
+        <div class="data-item">
+          <div class="data-label">소요 시간</div>
+          <div class="data-value">
+            <span id="duration">-</span>
+            <span class="data-unit">초</span>
+          </div>
+        </div>
+        <div class="data-item">
+          <div class="data-label">세션 ID</div>
+          <div class="data-value" style="font-size: var(--font-size-lg);">
+            <span id="sessionId">-</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 프로그레스 바 (수유 중에만 표시) -->
+      <div id="progressContainer" style="display: none;">
+        <div class="progress-container">
+          <div class="progress-bar" id="progressBar" style="width: 0%;"></div>
+        </div>
+        <p style="text-align: center; margin-top: var(--spacing-2); font-size: var(--font-size-sm); color: var(--color-text-secondary);">
+          수유 진행 중...
+        </p>
+      </div>
+    </div>
+
+    <!-- 수유 기록 테이블 -->
+    <div class="log-container" style="margin-bottom: var(--spacing-6);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-4);">
+        <h3 class="log-title">📊 수유 기록</h3>
+        <button onclick="loadFeedingRecords()" style="background: var(--color-primary); color: var(--color-white); padding: var(--spacing-2) var(--spacing-4); border-radius: var(--radius-md); border: none; cursor: pointer; font-size: var(--font-size-sm);">
+          🔄 새로고침
+        </button>
+      </div>
+      <div id="feedingRecords" style="overflow-x: auto;">
+        <p style="text-align: center; color: var(--color-text-tertiary); padding: var(--spacing-4);">
+          수유 기록을 불러오는 중...
+        </p>
+      </div>
+    </div>
+
+    <!-- 실시간 로그 -->
+    <div class="log-container">
+      <h3 class="log-title">📋 실시간 로그</h3>
+      <div id="logList">
+        <div class="log-item">
+          <div class="log-time">시스템 시작</div>
+          <div class="log-message">대시보드가 로드되었습니다.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const deviceId = <%= device.device_id %>;
+    const deviceUuid = '<%= device.device_uuid %>';
+    const bottleWeight = <%= device.bottle_weight || 0 %>;
+
+    let socket = null;
+    let currentSessionId = null;
+    let currentState = 'idle';  // 현재 수유 상태: idle, ready, feeding, completed
+    let feedingStartTime = null;
+    let durationInterval = null;
+
+    // Socket.IO 연결
+    function connectSocket() {
+      socket = io();
+
+      socket.on('connect', () => {
+        console.log('✅ Socket.IO 연결됨');
+        updateConnectionStatus(true);
+        addLog('서버와 연결되었습니다.');
+      });
+
+      socket.on('disconnect', () => {
+        console.log('❌ Socket.IO 연결 끊김');
+        updateConnectionStatus(false);
+        addLog('서버와의 연결이 끊어졌습니다.');
+      });
+
+      // 기기 온라인 상태
+      socket.on('device:online', (data) => {
+        if (data.device_uuid === deviceUuid) {
+          addLog(`기기가 온라인 상태입니다: ${data.device_name}`);
+        }
+      });
+
+      // 기기 오프라인 상태
+      socket.on('device:offline', (data) => {
+        if (data.device_uuid === deviceUuid) {
+          addLog('기기가 오프라인 상태입니다.');
+          resetStatus();
+        }
+      });
+
+      // 수유 시작 (준비 중)
+      socket.on('feeding:started', (data) => {
+        if (data.device_uuid === deviceUuid) {
+          currentSessionId = data.session_id;
+          currentState = 'ready';
+          updateStatus('ready', '🟡 준비 중', '젖병을 올려주세요');
+          document.getElementById('sessionId').textContent = data.session_id;
+          addLog(`수유 세션 시작: ID ${data.session_id}`);
+        }
+      });
+
+      // 젖병 올림 (온도 측정 완료)
+      socket.on('bottle:status', (data) => {
+        if (data.session_id === currentSessionId) {
+          const tempSafe = data.temperature_safe;
+          const tempStatus = data.temperature_status || 'safe';
+          const initialWeight = data.weight_actual || (data.weight - bottleWeight);
+
+          currentState = 'ready';  // 상태 설정
+
+          document.getElementById('beforeWeight').textContent = initialWeight.toFixed(1);
+          document.getElementById('temperature').textContent = data.temperature.toFixed(1);
+          document.getElementById('temperature').className = tempSafe ? 'temp-safe' : 'temp-unsafe';
+
+          // 온도 상태에 따른 메시지
+          let tempMessage;
+          if (tempSafe) {
+            tempMessage = `${data.temperature.toFixed(1)}°C - 적정 온도입니다`;
+          } else if (tempStatus === 'low') {
+            tempMessage = `${data.temperature.toFixed(1)}°C - 온도가 낮습니다`;
+          } else {
+            tempMessage = `${data.temperature.toFixed(1)}°C - 온도가 높습니다`;
+          }
+
+          updateStatus(
+            'ready',
+            tempSafe ? '✅ 온도 적정' : '⚠️ 온도 주의',
+            tempMessage
+          );
+
+          addLog(`젖병 감지: 초기 분유량 ${initialWeight.toFixed(1)}g, 온도 ${data.temperature.toFixed(1)}°C ${tempSafe ? '(안전)' : tempStatus === 'low' ? '(낮음)' : '(높음)'}`);
+        }
+      });
+
+      // 온도 업데이트 (지속 측정)
+      socket.on('temperature:status', (data) => {
+        // 온도는 세션과 관계없이 항상 업데이트
+        const tempSafe = data.temperature_safe;
+        const tempStatus = data.temperature_status || 'safe';
+
+        // 온도 표시 업데이트
+        const tempElement = document.getElementById('temperature');
+        tempElement.textContent = data.temperature.toFixed(1);
+        tempElement.className = tempSafe ? 'temp-safe' : 'temp-unsafe';
+
+        // 온도 상태에 따른 메시지
+        let tempMessage;
+        if (tempSafe) {
+          tempMessage = `${data.temperature.toFixed(1)}°C - 적정 온도입니다`;
+        } else if (tempStatus === 'low') {
+          tempMessage = `${data.temperature.toFixed(1)}°C - 온도가 낮습니다`;
+        } else {
+          tempMessage = `${data.temperature.toFixed(1)}°C - 온도가 높습니다`;
+        }
+
+        // 현재 세션의 온도 업데이트인 경우 추가 처리
+        if (data.session_id === currentSessionId) {
+          // 상태 설명 항상 업데이트 (준비 중이거나 수유 대기 중일 때)
+          if (currentState === 'ready') {
+            updateStatus(
+              'ready',
+              tempSafe ? '✅ 온도 적정' : '⚠️ 온도 주의',
+              tempMessage
+            );
+          }
+
+          addLog(`온도 업데이트: ${data.temperature.toFixed(1)}°C ${tempSafe ? '(안전)' : tempStatus === 'low' ? '(낮음)' : '(높음)'}`);
+        } else {
+          // 세션이 없어도 온도는 표시 (로그만 간단하게)
+          console.log(`온도 측정: ${data.temperature.toFixed(1)}°C ${tempSafe ? '(안전)' : tempStatus === 'low' ? '(낮음)' : '(높음)'}`);
+        }
+      });
+
+      // 수유 진행 중
+      socket.on('feeding:in_progress', (data) => {
+        if (data.session_id === currentSessionId) {
+          currentState = 'feeding';
+          updateStatus('feeding', '🍼 수유 중', '아기가 분유를 먹고 있습니다');
+          feedingStartTime = new Date();
+          startDurationTimer();
+          showProgress();
+          addLog('수유 시작: 아기가 젖병을 들었습니다.');
+        }
+      });
+
+      // 수유 완료
+      socket.on('feeding:completed', (data) => {
+        if (data.session_id === currentSessionId) {
+          currentState = 'completed';
+          stopDurationTimer();
+          hideProgress();
+
+          const beforeWeight = data.weight_before || 0;
+          const afterWeight = data.weight_after || 0;
+          const consumed = data.amount_consumed || 0;
+          const durationSeconds = data.duration || 0;
+
+          document.getElementById('afterWeight').textContent = afterWeight.toFixed(1);
+          document.getElementById('consumedAmount').textContent = consumed.toFixed(1);
+          document.getElementById('consumedCalc').textContent = `(${beforeWeight.toFixed(1)}g - ${afterWeight.toFixed(1)}g)`;
+          document.getElementById('duration').textContent = durationSeconds;
+
+          updateStatus('completed', '✅ 수유 완료', `${consumed.toFixed(1)}ml를 마셨습니다`);
+          addLog(`수유 완료: ${consumed.toFixed(1)}ml (${beforeWeight.toFixed(1)}g → ${afterWeight.toFixed(1)}g), ${durationSeconds}초 소요`);
+
+          // 수유 기록 새로고침
+          loadFeedingRecords();
+
+          // 5초 후 초기화
+          setTimeout(() => {
+            resetStatus();
+            addLog('새로운 수유를 대기합니다.');
+          }, 5000);
+        }
+      });
+
+      // 에러
+      socket.on('error', (data) => {
+        addLog(`⚠️ 에러: ${data.message}`, true);
+      });
+    }
+
+    // 연결 상태 업데이트
+    function updateConnectionStatus(isOnline) {
+      const statusEl = document.getElementById('connectionStatus');
+      if (isOnline) {
+        statusEl.className = 'connection-status connection-online';
+        statusEl.innerHTML = '<span class="connection-dot"></span> 연결됨';
+      } else {
+        statusEl.className = 'connection-status connection-offline';
+        statusEl.innerHTML = '<span class="connection-dot"></span> 연결 끊김';
+      }
+    }
+
+    // 수유 상태 업데이트
+    function updateStatus(state, title, desc) {
+      const icons = {
+        idle: '💤',
+        ready: '🟡',
+        feeding: '🍼',
+        completed: '✅'
+      };
+
+      document.getElementById('statusIcon').textContent = icons[state] || '💤';
+      document.getElementById('statusIcon').className = 'status-icon status-' + state;
+      document.getElementById('statusTitle').textContent = title;
+      document.getElementById('statusDesc').textContent = desc;
+    }
+
+    // 상태 초기화
+    function resetStatus() {
+      currentSessionId = null;
+      currentState = 'idle';
+      feedingStartTime = null;
+      stopDurationTimer();
+      hideProgress();
+
+      updateStatus('idle', '대기 중', '젖병을 무게 센서에 올려주세요');
+      document.getElementById('sessionId').textContent = '-';
+      document.getElementById('beforeWeight').textContent = '-';
+      document.getElementById('afterWeight').textContent = '-';
+      document.getElementById('consumedAmount').textContent = '-';
+      document.getElementById('consumedCalc').textContent = '-';
+      document.getElementById('temperature').textContent = '-';
+      document.getElementById('duration').textContent = '-';
+    }
+
+    // 소요 시간 타이머 시작 (초 단위)
+    function startDurationTimer() {
+      durationInterval = setInterval(() => {
+        if (feedingStartTime) {
+          const elapsed = Math.floor((new Date() - feedingStartTime) / 1000);
+          document.getElementById('duration').textContent = elapsed;
+        }
+      }, 1000);
+    }
+
+    // 소요 시간 타이머 중지
+    function stopDurationTimer() {
+      if (durationInterval) {
+        clearInterval(durationInterval);
+        durationInterval = null;
+      }
+    }
+
+    // 프로그레스 바 표시
+    function showProgress() {
+      document.getElementById('progressContainer').style.display = 'block';
+      animateProgress();
+    }
+
+    // 프로그레스 바 숨김
+    function hideProgress() {
+      document.getElementById('progressContainer').style.display = 'none';
+      document.getElementById('progressBar').style.width = '0%';
+    }
+
+    // 프로그레스 바 애니메이션
+    function animateProgress() {
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += 1;
+        if (progress > 100) progress = 0;
+        document.getElementById('progressBar').style.width = progress + '%';
+      }, 100);
+    }
+
+    // 로그 추가
+    function addLog(message, isError = false) {
+      const logList = document.getElementById('logList');
+      const logItem = document.createElement('div');
+      logItem.className = 'log-item';
+      if (isError) logItem.style.borderLeftColor = 'var(--color-error)';
+
+      const time = new Date().toLocaleTimeString('ko-KR');
+      logItem.innerHTML = `
+        <div class="log-time">${time}</div>
+        <div class="log-message">${message}</div>
+      `;
+
+      logList.insertBefore(logItem, logList.firstChild);
+
+      // 최대 50개까지만 유지
+      while (logList.children.length > 50) {
+        logList.removeChild(logList.lastChild);
+      }
+    }
+
+    // 수유 기록 로드
+    async function loadFeedingRecords() {
+      try {
+        const response = await fetch(`/devices/api/${deviceId}/feedings?limit=20`);
+        const result = await response.json();
+
+        console.log('수유 기록 데이터:', result);
+
+        const container = document.getElementById('feedingRecords');
+
+        if (!result.success || result.data.length === 0) {
+          container.innerHTML = '<p style="text-align: center; color: var(--color-text-tertiary); padding: var(--spacing-4);">아직 수유 기록이 없습니다.</p>';
+          return;
+        }
+
+        console.log('첫 번째 기록 샘플:', result.data[0]);
+
+        // 테이블 생성
+        let tableHtml = `
+          <table class="feeding-records-table">
+            <thead>
+              <tr>
+                <th>시간</th>
+                <th>초기 분유량</th>
+                <th>마지막 분유량</th>
+                <th>마신 양</th>
+                <th>온도</th>
+                <th>소요 시간</th>
+                <th>상태</th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
+
+        result.data.forEach((record, index) => {
+          try {
+            const time = new Date(record.timestamp).toLocaleString('ko-KR', {
+              month: 'short',
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            });
+
+            // 숫자 변환 (DB에서 문자열로 올 수 있음)
+            let amount = '-';
+            if (record.amount_consumed !== null && record.amount_consumed !== undefined) {
+              const amountNum = parseFloat(record.amount_consumed);
+              amount = !isNaN(amountNum) ? amountNum.toFixed(1) : '-';
+            }
+
+            let temp = '-';
+            if (record.temperature !== null && record.temperature !== undefined) {
+              const tempNum = parseFloat(record.temperature);
+              temp = !isNaN(tempNum) ? tempNum.toFixed(1) : '-';
+            }
+
+            const tempSafe = record.temperature_safe === 1 || record.temperature_safe === true;
+
+            let duration = '-';
+            if (record.duration !== null && record.duration !== undefined) {
+              const durationNum = parseFloat(record.duration);
+              duration = !isNaN(durationNum) ? durationNum : '-';
+            }
+
+            const tempColor = tempSafe ? 'var(--color-success)' : 'var(--color-error)';
+            const tempIcon = tempSafe ? '✓' : '⚠';
+
+            // 초기/마지막 분유량 계산 (feeding_sessions 테이블에서 가져옴)
+            let beforeWeight = '-';
+            let afterWeight = '-';
+
+            // weight_before는 feeding_records에 없으므로, amount_consumed와 weight를 활용
+            // amount_consumed = weight_before - weight_after
+            // 단순히 표시만 하자 (데이터가 없으면 - 표시)
+            if (record.weight_before !== null && record.weight_before !== undefined) {
+              const beforeNum = parseFloat(record.weight_before);
+              beforeWeight = !isNaN(beforeNum) ? beforeNum.toFixed(1) : '-';
+            }
+
+            if (record.weight_after !== null && record.weight_after !== undefined) {
+              const afterNum = parseFloat(record.weight_after);
+              afterWeight = !isNaN(afterNum) ? afterNum.toFixed(1) : '-';
+            }
+
+            // weight_before가 없으면 amount_consumed + weight_after로 계산
+            if (beforeWeight === '-' && amount !== '-' && afterWeight !== '-') {
+              const calculated = parseFloat(amount) + parseFloat(afterWeight);
+              beforeWeight = !isNaN(calculated) ? calculated.toFixed(1) : '-';
+            }
+
+            tableHtml += `
+              <tr>
+                <td>${time}</td>
+                <td>${beforeWeight}g</td>
+                <td>${afterWeight}g</td>
+                <td style="font-weight: var(--font-weight-semibold); color: var(--color-primary);">${amount} ml</td>
+                <td style="color: ${tempColor};">${tempIcon} ${temp}°C</td>
+                <td>${duration}초</td>
+                <td><span style="background: var(--color-success-lighter); color: var(--color-success); padding: 2px 8px; border-radius: var(--radius-full); font-size: var(--font-size-xs);">완료</span></td>
+              </tr>
+            `;
+          } catch (error) {
+            console.error(`레코드 ${index} 처리 오류:`, error, record);
+          }
+        });
+
+        tableHtml += `
+            </tbody>
+          </table>
+        `;
+
+        container.innerHTML = tableHtml;
+        addLog(`수유 기록 ${result.data.length}개를 불러왔습니다.`);
+      } catch (error) {
+        console.error('수유 기록 로드 실패:', error);
+        document.getElementById('feedingRecords').innerHTML =
+          '<p style="text-align: center; color: var(--color-error); padding: var(--spacing-4);">수유 기록을 불러오는데 실패했습니다.</p>';
+        addLog('⚠️ 수유 기록 로드 실패', true);
+      }
+    }
+
+    // 페이지 로드 시 Socket.IO 연결 및 수유 기록 로드
+    window.addEventListener('DOMContentLoaded', () => {
+      connectSocket();
+      loadFeedingRecords();
+      addLog(`기기 대시보드 시작: ${deviceUuid}`);
+      if (bottleWeight === 0) {
+        addLog('⚠️ 분유통 무게가 등록되지 않았습니다. 정확한 측정을 위해 등록하세요.', true);
+      }
+    });
+
+    // 페이지 종료 시 연결 해제
+    window.addEventListener('beforeunload', () => {
+      if (socket) {
+        socket.disconnect();
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - Smart Bottle</title>
+  <link rel="stylesheet" href="/assets/css/dashboard.css">
+  <style>
+    :root {
+      --color-error-lighter: #FEE2E2;
+    }
+    .devices-container { max-width: 1200px; margin: 0 auto; padding: var(--spacing-8); }
+    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-8); }
+    .page-title { font-size: var(--font-size-3xl); font-weight: var(--font-weight-bold); color: var(--color-text-primary); }
+    .btn-primary { background: var(--color-primary); color: var(--color-text-inverse); padding: var(--spacing-3) var(--spacing-6); border-radius: var(--radius-md); border: none; font-weight: var(--font-weight-medium); cursor: pointer; transition: all var(--transition-base); }
+    .btn-primary:hover { background: var(--color-primary-dark); }
+    .devices-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: var(--spacing-6); }
+    .device-card { background: var(--color-white); border-radius: var(--radius-2xl); padding: var(--spacing-6); box-shadow: var(--shadow-sm); transition: all var(--transition-base); }
+    .device-card:hover { box-shadow: var(--shadow-md); }
+    .device-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: var(--spacing-4); }
+    .device-name { font-size: var(--font-size-xl); font-weight: var(--font-weight-semibold); color: var(--color-text-primary); margin-bottom: var(--spacing-2); }
+    .device-uuid { font-size: var(--font-size-sm); color: var(--color-text-tertiary); font-family: monospace; }
+    .status-badge { padding: var(--spacing-1) var(--spacing-3); border-radius: var(--radius-full); font-size: var(--font-size-xs); font-weight: var(--font-weight-medium); }
+    .status-online { background: var(--color-success-lighter); color: var(--color-success); }
+    .status-offline { background: var(--color-gray-100); color: var(--color-text-tertiary); }
+    .device-info { margin-bottom: var(--spacing-4); }
+    .info-row { display: flex; justify-content: space-between; padding: var(--spacing-2) 0; border-bottom: 1px solid var(--color-gray-100); }
+    .info-label { font-size: var(--font-size-sm); color: var(--color-text-secondary); }
+    .info-value { font-size: var(--font-size-sm); font-weight: var(--font-weight-medium); color: var(--color-text-primary); }
+    .device-actions { display: flex; gap: var(--spacing-2); }
+    .btn-edit, .btn-delete { flex: 1; padding: var(--spacing-2) var(--spacing-4); border-radius: var(--radius-md); border: none; font-size: var(--font-size-sm); font-weight: var(--font-weight-medium); cursor: pointer; transition: all var(--transition-base); }
+    .btn-edit { background: var(--color-primary-lighter); color: var(--color-primary); }
+    .btn-edit:hover { background: var(--color-primary-light); color: var(--color-white); }
+    .btn-delete { background: var(--color-gray-100); color: var(--color-text-secondary); }
+    .btn-delete:hover { background: var(--color-error); color: var(--color-white); }
+    .empty-state { text-align: center; padding: var(--spacing-16); }
+    .empty-icon { font-size: 64px; margin-bottom: var(--spacing-4); }
+    .empty-title { font-size: var(--font-size-xl); font-weight: var(--font-weight-semibold); color: var(--color-text-primary); margin-bottom: var(--spacing-2); }
+    .empty-desc { font-size: var(--font-size-base); color: var(--color-text-secondary); margin-bottom: var(--spacing-6); }
+
+    /* 실시간 업데이트 */
+    .status-badge { transition: all 0.3s ease; }
+    .status-changed { animation: statusPulse 0.5s ease; }
+    @keyframes statusPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+    .update-indicator { position: fixed; top: var(--spacing-4); right: var(--spacing-4); background: var(--color-white); padding: var(--spacing-2) var(--spacing-4); border-radius: var(--radius-full); box-shadow: var(--shadow-md); font-size: var(--font-size-sm); color: var(--color-text-secondary); display: none; align-items: center; gap: var(--spacing-2); }
+    .update-indicator.active { display: flex; }
+    .update-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--color-success); animation: pulse 1.5s ease-in-out infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+  </style>
+</head>
+<body>
+  <!-- 실시간 업데이트 인디케이터 -->
+  <div id="updateIndicator" class="update-indicator">
+    <div class="update-dot"></div>
+    실시간 연결 상태 확인 중
+  </div>
+
+  <div class="devices-container">
+    <div class="page-header">
+      <h1 class="page-title">🔌 기기 관리</h1>
+      <a href="/devices/register" class="btn-primary">+ 새 기기 등록</a>
+    </div>
+
+    <% if (devices && devices.length > 0) { %>
+      <div class="devices-grid" id="devicesGrid">
+        <% devices.forEach(device => { %>
+          <div class="device-card" data-device-id="<%= device.device_id %>">
+            <div class="device-header">
+              <div>
+                <div class="device-name"><%= device.device_name %></div>
+                <div class="device-uuid"><%= device.device_uuid %></div>
+              </div>
+              <span class="status-badge <%= device.is_online ? 'status-online' : 'status-offline' %>" data-status="<%= device.is_online ? 'online' : 'offline' %>">
+                <%= device.is_online ? '● 온라인' : '○ 오프라인' %>
+              </span>
+            </div>
+
+            <div class="device-info">
+              <div class="info-row">
+                <span class="info-label">분유통 무게</span>
+                <span class="info-value">
+                  <% if (device.bottle_weight && device.bottle_weight > 0) { %>
+                    <%= device.bottle_weight %>g
+                  <% } else { %>
+                    <span style="color: var(--color-error); font-weight: var(--font-weight-semibold);">미등록 ⚠️</span>
+                  <% } %>
+                </span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">마지막 연결</span>
+                <span class="info-value" data-last-connected>
+                  <%= device.last_connected ? new Date(device.last_connected).toLocaleString('ko-KR') : '연결 안 됨' %>
+                </span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">등록일</span>
+                <span class="info-value"><%= new Date(device.created_at).toLocaleDateString('ko-KR') %></span>
+              </div>
+            </div>
+
+            <% if (!device.bottle_weight || device.bottle_weight === 0) { %>
+              <div style="background: var(--color-error-lighter); border-left: 4px solid var(--color-error); padding: var(--spacing-3); border-radius: var(--radius-md); margin-bottom: var(--spacing-3); font-size: var(--font-size-sm);">
+                ⚠️ 수유 기록을 시작하려면 분유통 무게를 등록하세요!
+              </div>
+            <% } %>
+
+            <div class="device-actions">
+              <button class="btn-dashboard" onclick="location.href='/devices/<%= device.device_id %>/dashboard'" style="background: var(--color-primary); color: var(--color-white); flex: 1; padding: var(--spacing-2) var(--spacing-4); border-radius: var(--radius-md); border: none; font-size: var(--font-size-sm); font-weight: var(--font-weight-medium); cursor: pointer; transition: all var(--transition-base);">
+                📊 대시보드
+              </button>
+              <button class="btn-edit" onclick="location.href='/devices/<%= device.device_id %>/edit'">
+                <% if (!device.bottle_weight || device.bottle_weight === 0) { %>
+                  ⚖️ 분유통 무게 등록
+                <% } else { %>
+                  ✏️ 수정
+                <% } %>
+              </button>
+              <button class="btn-delete" onclick="deleteDevice(<%= device.device_id %>, '<%= device.device_name %>')">
+                🗑️ 삭제
+              </button>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <div class="empty-state">
+        <div class="empty-icon">📱</div>
+        <h2 class="empty-title">등록된 기기가 없습니다</h2>
+        <p class="empty-desc">스마트 젖병 기기를 등록하여 수유 데이터를 자동으로 기록하세요.</p>
+        <a href="/devices/register" class="btn-primary">첫 기기 등록하기</a>
+      </div>
+    <% } %>
+  </div>
+
+  <script>
+    let pollingInterval = null;
+    const POLLING_INTERVAL = 5000; // 5초마다 업데이트
+
+    /**
+     * 기기 삭제
+     */
+    async function deleteDevice(deviceId, deviceName) {
+      if (!confirm(`'${deviceName}' 기기를 삭제하시겠습니까?\n\n연관된 수유 기록도 함께 삭제됩니다.`)) {
+        return;
+      }
+
+      try {
+        const response = await fetch(`/devices/api/${deviceId}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          alert('기기가 삭제되었습니다.');
+          location.reload();
+        } else {
+          alert(`삭제 실패: ${result.error}`);
+        }
+      } catch (error) {
+        console.error('Delete error:', error);
+        alert('기기 삭제 중 오류가 발생했습니다.');
+      }
+    }
+
+    /**
+     * 실시간 기기 상태 업데이트
+     */
+    async function updateDeviceStatus() {
+      const indicator = document.getElementById('updateIndicator');
+
+      try {
+        // 인디케이터 표시
+        indicator.classList.add('active');
+
+        // 기기 목록 API 호출
+        const response = await fetch('/devices/api/list');
+        const result = await response.json();
+
+        if (result.success && result.data) {
+          const devices = result.data;
+
+          // 현재 표시된 기기 수와 다르면 전체 새로고침
+          const currentDeviceCount = document.querySelectorAll('.device-card').length;
+          if (devices.length !== currentDeviceCount) {
+            console.log('새로운 기기가 추가되었습니다. 페이지를 새로고침합니다.');
+            location.reload();
+            return;
+          }
+
+          // 각 기기 상태 업데이트
+          devices.forEach(device => {
+            updateDeviceCard(device);
+          });
+        }
+
+        // 3초 후 인디케이터 숨김
+        setTimeout(() => {
+          indicator.classList.remove('active');
+        }, 3000);
+
+      } catch (error) {
+        console.error('Update error:', error);
+        indicator.classList.remove('active');
+      }
+    }
+
+    /**
+     * 개별 기기 카드 업데이트
+     */
+    function updateDeviceCard(device) {
+      const card = document.querySelector(`[data-device-id="${device.device_id}"]`);
+      if (!card) return;
+
+      // 상태 뱃지 업데이트
+      const statusBadge = card.querySelector('.status-badge');
+      const currentStatus = statusBadge.getAttribute('data-status');
+      const newStatus = device.is_online ? 'online' : 'offline';
+
+      if (currentStatus !== newStatus) {
+        // 상태가 변경되었을 때
+        statusBadge.setAttribute('data-status', newStatus);
+        statusBadge.className = `status-badge ${newStatus === 'online' ? 'status-online' : 'status-offline'} status-changed`;
+        statusBadge.textContent = newStatus === 'online' ? '● 온라인' : '○ 오프라인';
+
+        // 애니메이션 제거 (다음 변경을 위해)
+        setTimeout(() => {
+          statusBadge.classList.remove('status-changed');
+        }, 500);
+
+        // 상태 변경 알림 (선택적)
+        console.log(`${device.device_name} 상태 변경: ${currentStatus} → ${newStatus}`);
+      }
+
+      // 마지막 연결 시간 업데이트
+      const lastConnectedElement = card.querySelector('[data-last-connected]');
+      if (lastConnectedElement && device.last_connected) {
+        const formattedDate = new Date(device.last_connected).toLocaleString('ko-KR');
+        lastConnectedElement.textContent = formattedDate;
+      }
+    }
+
+    /**
+     * 폴링 시작
+     */
+    function startPolling() {
+      // 즉시 한 번 실행
+      updateDeviceStatus();
+
+      // 5초마다 반복
+      pollingInterval = setInterval(updateDeviceStatus, POLLING_INTERVAL);
+
+      console.log('실시간 기기 상태 업데이트 시작 (5초 간격)');
+    }
+
+    /**
+     * 폴링 중지
+     */
+    function stopPolling() {
+      if (pollingInterval) {
+        clearInterval(pollingInterval);
+        pollingInterval = null;
+        console.log('실시간 기기 상태 업데이트 중지');
+      }
+    }
+
+    // 페이지 로드 시 폴링 시작
+    document.addEventListener('DOMContentLoaded', () => {
+      <% if (devices && devices.length > 0) { %>
+        startPolling();
+      <% } %>
+    });
+
+    // 페이지를 벗어날 때 폴링 중지
+    window.addEventListener('beforeunload', () => {
+      stopPolling();
+    });
+
+    // 페이지가 보이지 않을 때 폴링 중지 (탭 전환 등)
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        stopPolling();
+      } else {
+        <% if (devices && devices.length > 0) { %>
+          startPolling();
+        <% } %>
+      }
+    });
+  </script>
+</body>
+</html>

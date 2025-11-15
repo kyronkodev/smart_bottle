@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>스마트 젖병 - 우리 아기 대시보드</title>
+    <link rel="stylesheet" href="/assets/css/dashboard.css">
+</head>
+<body>
+    <!-- 헤더 -->
+    <header class="header">
+        <div class="header-container">
+            <div class="header-left">
+                <div class="logo">
+                    🍼
+                </div>
+                <div class="header-title">
+                    <h1>스마트 젖병 모니터링</h1>
+                    <p>우리 아기 수유 현황</p>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="user-info">
+                    <p>안녕하세요</p>
+                    <p>박지은 님</p>
+                </div>
+                <button class="notification-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
+                        <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+                    </svg>
+                    <span class="notification-badge"></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- 아기 정보 카드 -->
+        <div class="baby-info-card">
+            <div class="baby-info-section">
+                <div class="baby-info">
+                    <div class="baby-avatar">
+                        👶
+                    </div>
+                    <div class="baby-details">
+                        <h2>지후</h2>
+                        <div class="baby-badges">
+                            <span class="baby-badge">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                    <line x1="16" y1="2" x2="16" y2="6"/>
+                                    <line x1="8" y1="2" x2="8" y2="6"/>
+                                    <line x1="3" y1="10" x2="21" y2="10"/>
+                                </svg>
+                                생후 42일 (6주)
+                            </span>
+                            <span class="baby-badge">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                    <circle cx="9" cy="7" r="4"/>
+                                </svg>
+                                남아
+                            </span>
+                            <span class="baby-badge">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M20 6L9 17l-5-5"/>
+                                </svg>
+                                출생 체중 3.2kg
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="last-feeding-info">
+                    <p>마지막 수유</p>
+                    <p>2시간 15분 전</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 실시간 수유 중 (조건부 표시) -->
+        <div class="feeding-active">
+            <div class="feeding-active-content">
+                <div class="feeding-active-left">
+                    <div class="feeding-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="feeding-status">
+                            <span>수유 진행 중</span>
+                            <span class="pulse-dot"></span>
+                        </div>
+                        <div class="feeding-meta">
+                            <span>시작 시각: 오후 3:24</span>
+                            <span>현재 온도: 37.5°C (적정)</span>
+                            <span>경과 시간: 5분</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="feeding-amount">
+                    <div class="feeding-amount-text">
+                        <span id="feeding-amount">85</span><small>/120ml</small>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 71%;"></div>
+                    </div>
+                    <div class="progress-label">진행률 71%</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 오늘의 통계 -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon blue">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+                    </svg>
+                </div>
+                <div class="stat-label">오늘 총 수유량</div>
+                <div class="stat-value">720ml</div>
+                <div class="stat-sublabel">목표 750ml</div>
+                <span class="stat-trend up">↑ 어제 대비 +35ml</span>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon green">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                    </svg>
+                </div>
+                <div class="stat-label">오늘 수유 횟수</div>
+                <div class="stat-value">6회</div>
+                <div class="stat-sublabel">평균 간격 3.2시간</div>
+                <span class="stat-trend up">↑ 규칙적</span>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon orange">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 9a4 4 0 0 0-2 7.5"/>
+                        <path d="M12 3v2"/>
+                        <path d="M20 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z"/>
+                    </svg>
+                </div>
+                <div class="stat-label">온도 준수율</div>
+                <div class="stat-value">100%</div>
+                <div class="stat-sublabel">36-40°C 유지</div>
+                <span class="stat-trend up">↑ 완벽</span>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon purple">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 20v-6M6 20V10M18 20V4"/>
+                    </svg>
+                </div>
+                <div class="stat-label">평균 수유량</div>
+                <div class="stat-value">120ml</div>
+                <div class="stat-sublabel">1회당 평균</div>
+                <span class="stat-trend up">↑ 양호</span>
+            </div>
+        </div>
+
+        <!-- AI 분석 리포트 -->
+        <div class="card">
+            <div class="section-header">
+                <div class="section-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M12 16v-4"/>
+                        <path d="M12 8h.01"/>
+                    </svg>
+                </div>
+                <h3>AI 분석 리포트</h3>
+            </div>
+            <div class="insights-grid">
+                <div class="insight-card insight-positive">
+                    <h4>
+                        ✅ 건강한 수유 패턴
+                    </h4>
+                    <p>지후의 수유량과 간격이 생후 6주 기준으로 매우 양호합니다. 규칙적인 수유 시간을 잘 지키고 있어요.</p>
+                </div>
+                <div class="insight-card insight-info">
+                    <h4>
+                        📊 또래 평균 대비 상위
+                    </h4>
+                    <p>생후 6주 아기 평균 대비 일일 수유량이 8% 높습니다. 건강하게 잘 자라고 있어요.</p>
+                </div>
+                <div class="insight-card insight-positive">
+                    <h4>
+                        🌡️ 완벽한 온도 관리
+                    </h4>
+                    <p>모든 수유에서 적정 온도(36-40°C)가 유지되고 있습니다. 아기가 편안하게 수유할 수 있어요.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 수유 기록 테이블 -->
+        <div class="card">
+            <div class="table-header">
+                <h3 class="table-title">오늘의 수유 기록</h3>
+                <div class="table-filter">
+                    <button class="filter-btn active">오늘</button>
+                    <button class="filter-btn">어제</button>
+                    <button class="filter-btn">이번 주</button>
+                </div>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>시간</th>
+                            <th>수유량</th>
+                            <th>소요 시간</th>
+                            <th>온도</th>
+                            <th>상태</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="font-semibold">오전 6:30</td>
+                            <td>
+                                <span class="amount-display">
+                                    <span class="amount-value">125</span>
+                                    <span class="amount-unit">ml</span>
+                                </span>
+                            </td>
+                            <td>12분</td>
+                            <td class="temp-good">37.2°C</td>
+                            <td><span class="badge badge-success">완료</span></td>
+                        </tr>
+                        <tr>
+                            <td class="font-semibold">오전 9:45</td>
+                            <td>
+                                <span class="amount-display">
+                                    <span class="amount-value">110</span>
+                                    <span class="amount-unit">ml</span>
+                                </span>
+                            </td>
+                            <td>10분</td>
+                            <td class="temp-good">38.1°C</td>
+                            <td><span class="badge badge-success">완료</span></td>
+                        </tr>
+                        <tr>
+                            <td class="font-semibold">오후 12:20</td>
+                            <td>
+                                <span class="amount-display">
+                                    <span class="amount-value">130</span>
+                                    <span class="amount-unit">ml</span>
+                                </span>
+                            </td>
+                            <td>11분</td>
+                            <td class="temp-good">37.5°C</td>
+                            <td><span class="badge badge-success">완료</span></td>
+                        </tr>
+                        <tr>
+                            <td class="font-semibold">오후 3:15</td>
+                            <td>
+                                <span class="amount-display">
+                                    <span class="amount-value">115</span>
+                                    <span class="amount-unit">ml</span>
+                                </span>
+                            </td>
+                            <td>9분</td>
+                            <td class="temp-good">37.8°C</td>
+                            <td><span class="badge badge-success">완료</span></td>
+                        </tr>
+                        <tr>
+                            <td class="font-semibold">오후 6:10</td>
+                            <td>
+                                <span class="amount-display">
+                                    <span class="amount-value">120</span>
+                                    <span class="amount-unit">ml</span>
+                                </span>
+                            </td>
+                            <td>10분</td>
+                            <td class="temp-good">38.0°C</td>
+                            <td><span class="badge badge-success">완료</span></td>
+                        </tr>
+                        <tr class="row-highlight">
+                            <td class="font-semibold">오후 9:24</td>
+                            <td>
+                                <span class="amount-display">
+                                    <span class="amount-value">85</span>
+                                    <span class="amount-unit">ml</span>
+                                </span>
+                            </td>
+                            <td>5분</td>
+                            <td class="temp-good">37.5°C</td>
+                            <td><span class="badge badge-active">진행중</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 또래 비교 -->
+        <div class="comparison-card">
+            <div class="comparison-header">
+                <h3>생후 6주 또래 아기 평균 비교</h3>
+                <p>우리 아기는 또래 평균과 어떻게 비교될까요?</p>
+            </div>
+            <div class="comparison-items">
+                <div class="comparison-item">
+                    <div class="comparison-label">일일 평균 수유량</div>
+                    <div class="comparison-values">
+                        <div class="comparison-value">
+                            <div class="comparison-value-number mine">720ml</div>
+                            <div class="comparison-value-label">우리 아기</div>
+                        </div>
+                        <div class="comparison-value">
+                            <div class="comparison-value-number peer">665ml</div>
+                            <div class="comparison-value-label">또래 평균</div>
+                        </div>
+                    </div>
+                    <div class="comparison-result result-better">
+                        ✨ 평균 대비 +8% 우수
+                    </div>
+                </div>
+
+                <div class="comparison-item">
+                    <div class="comparison-label">수유 간격</div>
+                    <div class="comparison-values">
+                        <div class="comparison-value">
+                            <div class="comparison-value-number mine">3.2시간</div>
+                            <div class="comparison-value-label">우리 아기</div>
+                        </div>
+                        <div class="comparison-value">
+                            <div class="comparison-value-number peer">3.1시간</div>
+                            <div class="comparison-value-label">또래 평균</div>
+                        </div>
+                    </div>
+                    <div class="comparison-result result-similar">
+                        👍 평균과 유사 (정상)
+                    </div>
+                </div>
+
+                <div class="comparison-item">
+                    <div class="comparison-label">1회 평균 수유량</div>
+                    <div class="comparison-values">
+                        <div class="comparison-value">
+                            <div class="comparison-value-number mine">120ml</div>
+                            <div class="comparison-value-label">우리 아기</div>
+                        </div>
+                        <div class="comparison-value">
+                            <div class="comparison-value-number peer">110ml</div>
+                            <div class="comparison-value-label">또래 평균</div>
+                        </div>
+                    </div>
+                    <div class="comparison-result result-better">
+                        ✨ 평균 대비 +9% 우수
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/assets/js/dashboard.js"></script>
+</body>
+</html>

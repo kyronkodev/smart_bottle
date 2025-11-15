@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - Smart Bottle</title>
+  <link rel="stylesheet" href="/assets/css/dashboard.css">
+  <style>
+    .edit-container { max-width: 600px; margin: 0 auto; padding: var(--spacing-8); }
+    .page-title { font-size: var(--font-size-3xl); font-weight: var(--font-weight-bold); color: var(--color-text-primary); margin-bottom: var(--spacing-2); }
+    .page-subtitle { font-size: var(--font-size-base); color: var(--color-text-secondary); margin-bottom: var(--spacing-8); }
+    .form-card { background: var(--color-white); border-radius: var(--radius-2xl); padding: var(--spacing-8); box-shadow: var(--shadow-sm); }
+    .form-group { margin-bottom: var(--spacing-6); }
+    .form-label { display: block; font-size: var(--font-size-sm); font-weight: var(--font-weight-medium); color: var(--color-text-primary); margin-bottom: var(--spacing-2); }
+    .form-input { width: 100%; padding: var(--spacing-3) var(--spacing-4); border: 2px solid var(--color-gray-200); border-radius: var(--radius-md); font-size: var(--font-size-base); transition: all var(--transition-base); }
+    .form-input:focus { outline: none; border-color: var(--color-primary); }
+    .form-help { font-size: var(--font-size-sm); color: var(--color-text-tertiary); margin-top: var(--spacing-2); }
+    .form-help-important { color: var(--color-primary); font-weight: var(--font-weight-medium); }
+    .info-box { background: var(--color-primary-lighter); border-left: 4px solid var(--color-primary); padding: var(--spacing-4); border-radius: var(--radius-md); margin-bottom: var(--spacing-6); }
+    .info-title { font-size: var(--font-size-base); font-weight: var(--font-weight-semibold); color: var(--color-primary); margin-bottom: var(--spacing-2); }
+    .info-steps { font-size: var(--font-size-sm); color: var(--color-text-secondary); line-height: 1.6; }
+    .info-steps li { margin-bottom: var(--spacing-1); }
+    .form-actions { display: flex; gap: var(--spacing-3); margin-top: var(--spacing-8); }
+    .btn { flex: 1; padding: var(--spacing-3) var(--spacing-6); border-radius: var(--radius-md); border: none; font-size: var(--font-size-base); font-weight: var(--font-weight-medium); cursor: pointer; transition: all var(--transition-base); }
+    .btn-primary { background: var(--color-primary); color: var(--color-white); }
+    .btn-primary:hover { background: var(--color-primary-dark); }
+    .btn-secondary { background: var(--color-gray-100); color: var(--color-text-secondary); }
+    .btn-secondary:hover { background: var(--color-gray-200); }
+    .btn-measure { background: var(--color-primary-light); color: var(--color-white); width: 100%; margin-bottom: var(--spacing-3); }
+    .btn-measure:hover { background: var(--color-primary); }
+
+    /* 측정 모달 */
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
+    .modal.active { display: flex; }
+    .modal-content { background: var(--color-white); border-radius: var(--radius-2xl); padding: var(--spacing-8); max-width: 500px; width: 90%; box-shadow: var(--shadow-xl); }
+    .modal-title { font-size: var(--font-size-2xl); font-weight: var(--font-weight-bold); color: var(--color-primary); margin-bottom: var(--spacing-4); text-align: center; }
+    .modal-status { font-size: var(--font-size-lg); color: var(--color-text-secondary); margin-bottom: var(--spacing-6); text-align: center; line-height: 1.6; }
+    .weight-display { background: var(--color-primary-lighter); border-radius: var(--radius-lg); padding: var(--spacing-6); margin-bottom: var(--spacing-6); text-align: center; }
+    .weight-value { font-size: var(--font-size-4xl); font-weight: var(--font-weight-bold); color: var(--color-primary); }
+    .weight-unit { font-size: var(--font-size-lg); color: var(--color-text-secondary); margin-left: var(--spacing-2); }
+    .loading-spinner { width: 60px; height: 60px; border: 4px solid var(--color-gray-200); border-top-color: var(--color-primary); border-radius: 50%; animation: spin 1s linear infinite; margin: var(--spacing-6) auto; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .progress-dots { text-align: center; font-size: var(--font-size-2xl); color: var(--color-primary); margin: var(--spacing-4) 0; }
+    .modal-actions { display: flex; gap: var(--spacing-3); margin-top: var(--spacing-6); }
+  </style>
+</head>
+<body>
+  <div class="edit-container">
+    <h1 class="page-title">
+      <% if (!device.bottle_weight || device.bottle_weight === 0) { %>
+        ⚖️ 분유통 무게 등록
+      <% } else { %>
+        ✏️ 기기 정보 수정
+      <% } %>
+    </h1>
+    <p class="page-subtitle">기기 이름과 분유통 무게를 설정하세요</p>
+
+    <div class="form-card">
+      <form id="editForm">
+        <div class="form-group">
+          <label class="form-label" for="device_uuid">기기 UUID (변경 불가)</label>
+          <input
+            type="text"
+            id="device_uuid"
+            class="form-input"
+            value="<%= device.device_uuid %>"
+            disabled
+          >
+          <p class="form-help">기기의 고유 식별자입니다. 변경할 수 없습니다.</p>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="device_name">기기 이름 *</label>
+          <input
+            type="text"
+            id="device_name"
+            name="device_name"
+            class="form-input"
+            value="<%= device.device_name %>"
+            placeholder="예: 거실 스마트 젖병"
+            required
+          >
+          <p class="form-help">기기를 쉽게 식별할 수 있는 이름을 입력하세요.</p>
+        </div>
+
+        <div class="info-box">
+          <h3 class="info-title">⚠️ 분유통 무게 설정이 중요한 이유</h3>
+          <ol class="info-steps">
+            <li>분유통을 올리면 측정되는 무게 = <strong>분유 무게 + 분유통 무게</strong></li>
+            <li>실제 먹은 양 계산 시 분유통 무게가 자동으로 제외됩니다</li>
+            <li>정확한 측정을 위해 <strong>빈 분유통의 무게</strong>를 정확히 입력해주세요</li>
+          </ol>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="bottle_weight">분유통 무게 (g) *</label>
+          <button type="button" class="btn btn-measure" onclick="startWeightMeasurement()">
+            ⚖️ 분유통 무게 측정
+          </button>
+          <input
+            type="number"
+            id="bottle_weight"
+            name="bottle_weight"
+            class="form-input"
+            value="<%= device.bottle_weight %>"
+            placeholder="예: 85.5"
+            step="0.1"
+            min="0"
+            required
+          >
+          <p class="form-help form-help-important">
+            💡 자동 측정: 위 버튼을 눌러 자동으로 무게를 측정하거나, 직접 입력하세요.
+          </p>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" onclick="history.back()">
+            취소
+          </button>
+          <button type="submit" class="btn btn-primary">
+            <% if (!device.bottle_weight || device.bottle_weight === 0) { %>
+              ✅ 등록 완료
+            <% } else { %>
+              ✅ 저장
+            <% } %>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 무게 측정 모달 -->
+  <div id="measureModal" class="modal">
+    <div class="modal-content">
+      <h2 class="modal-title">⚖️ 분유통 무게 측정</h2>
+      <div id="modalBody">
+        <!-- 동적으로 변경됨 -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('editForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const deviceId = <%= device.device_id %>;
+      const deviceName = document.getElementById('device_name').value;
+      const bottleWeight = parseFloat(document.getElementById('bottle_weight').value);
+
+      if (!deviceName) {
+        alert('기기 이름을 입력해주세요.');
+        return;
+      }
+
+      if (isNaN(bottleWeight) || bottleWeight < 0) {
+        alert('분유통 무게를 올바르게 입력해주세요.');
+        return;
+      }
+
+      try {
+        const response = await fetch(`/devices/api/${deviceId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            device_name: deviceName,
+            bottle_weight: bottleWeight
+          })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          const wasEmpty = <%= device.bottle_weight ? 'false' : 'true' %>;
+          if (wasEmpty && bottleWeight > 0) {
+            alert('분유통 무게가 등록되었습니다!\n\n이제 수유 기록을 시작할 수 있습니다. 🎉');
+          } else {
+            alert('기기 정보가 수정되었습니다.');
+          }
+          location.href = '/devices';
+        } else {
+          alert(`수정 실패: ${result.error}`);
+        }
+      } catch (error) {
+        console.error('Update error:', error);
+        alert('기기 정보 수정 중 오류가 발생했습니다.');
+      }
+    });
+
+    // 무게 측정 관련 변수
+    let measureInterval = null;
+    let weightHistory = [];
+    const STABILITY_THRESHOLD = 0.5; // 0.5g 이내 변화
+    const STABILITY_DURATION = 3; // 3초간 안정
+
+    /**
+     * 무게 측정 시작
+     */
+    async function startWeightMeasurement() {
+      const modal = document.getElementById('measureModal');
+      const modalBody = document.getElementById('modalBody');
+      const deviceId = <%= device.device_id %>;
+
+      // 모달 열기
+      modal.classList.add('active');
+
+      // 1단계: 영점 조정
+      modalBody.innerHTML = `
+        <div class="loading-spinner"></div>
+        <p class="modal-status">무게 센서 영점을 조정하고 있습니다...</p>
+        <div class="progress-dots">⚙️</div>
+      `;
+
+      try {
+        // 영점 조정 API 호출
+        const tareResponse = await fetch(`/devices/api/${deviceId}/tare`, {
+          method: 'POST'
+        });
+        const tareResult = await tareResponse.json();
+
+        if (!tareResult.success) {
+          throw new Error('영점 조정 실패');
+        }
+
+        // 2단계: 젖병 올리기 안내
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        modalBody.innerHTML = `
+          <p class="modal-status">
+            영점 조정이 완료되었습니다!<br><br>
+            <strong>빈 분유통을 무게 센서에 올려주세요.</strong>
+          </p>
+          <div class="progress-dots">📋 ⏳</div>
+        `;
+
+        // 3단계: 무게 측정 시작
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        startWeightPolling(deviceId);
+
+      } catch (error) {
+        console.error('Measurement error:', error);
+        modalBody.innerHTML = `
+          <p class="modal-status" style="color: var(--color-error);">
+            ❌ 측정 중 오류가 발생했습니다.<br>
+            ${error.message}
+          </p>
+          <div class="modal-actions">
+            <button class="btn btn-primary" onclick="closeModal()">확인</button>
+          </div>
+        `;
+      }
+    }
+
+    /**
+     * 무게 폴링 시작
+     */
+    function startWeightPolling(deviceId) {
+      const modalBody = document.getElementById('modalBody');
+      weightHistory = [];
+
+      modalBody.innerHTML = `
+        <p class="modal-status">무게를 측정하고 있습니다...</p>
+        <div class="weight-display">
+          <span class="weight-value" id="currentWeight">0.0</span>
+          <span class="weight-unit">g</span>
+        </div>
+        <p class="modal-status" style="font-size: var(--font-size-sm); color: var(--color-text-tertiary);">
+          무게가 안정화될 때까지 기다려주세요...
+        </p>
+      `;
+
+      // 1초마다 무게 조회
+      measureInterval = setInterval(async () => {
+        try {
+          const response = await fetch(`/devices/api/${deviceId}/weight`);
+          const result = await response.json();
+
+          if (result.success) {
+            const weight = result.data.weight;
+            document.getElementById('currentWeight').textContent = weight.toFixed(1);
+
+            // 무게 히스토리에 추가
+            weightHistory.push(weight);
+
+            // 안정화 확인 (최근 3개 데이터)
+            if (weightHistory.length >= STABILITY_DURATION) {
+              const recentWeights = weightHistory.slice(-STABILITY_DURATION);
+              const maxWeight = Math.max(...recentWeights);
+              const minWeight = Math.min(...recentWeights);
+              const difference = maxWeight - minWeight;
+
+              // 무게가 안정화되었는지 확인
+              if (difference <= STABILITY_THRESHOLD && weight > 10) {
+                clearInterval(measureInterval);
+                onWeightStabilized(weight);
+              }
+            }
+
+            // 히스토리 크기 제한 (최근 10개만 유지)
+            if (weightHistory.length > 10) {
+              weightHistory.shift();
+            }
+          }
+        } catch (error) {
+          console.error('Weight polling error:', error);
+          clearInterval(measureInterval);
+          modalBody.innerHTML = `
+            <p class="modal-status" style="color: var(--color-error);">
+              ❌ 무게 측정 중 오류가 발생했습니다.
+            </p>
+            <div class="modal-actions">
+              <button class="btn btn-primary" onclick="closeModal()">확인</button>
+            </div>
+          `;
+        }
+      }, 1000);
+    }
+
+    /**
+     * 무게 안정화 완료
+     */
+    async function onWeightStabilized(weight) {
+      const modalBody = document.getElementById('modalBody');
+      const deviceId = <%= device.device_id %>;
+
+      modalBody.innerHTML = `
+        <p class="modal-status" style="color: var(--color-success); font-weight: var(--font-weight-semibold);">
+          ✅ 측정이 완료되었습니다!
+        </p>
+        <div class="weight-display">
+          <span class="weight-value">${weight.toFixed(1)}</span>
+          <span class="weight-unit">g</span>
+        </div>
+        <p class="modal-status">
+          분유통의 무게는 <strong>${weight.toFixed(1)}g</strong>입니다.<br>
+          자동으로 저장합니다...
+        </p>
+      `;
+
+      // 자동 저장
+      try {
+        await new Promise(resolve => setTimeout(resolve, 1500));
+
+        const deviceName = document.getElementById('device_name').value;
+        const response = await fetch(`/devices/api/${deviceId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            device_name: deviceName,
+            bottle_weight: weight
+          })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          // 입력 필드에 값 설정
+          document.getElementById('bottle_weight').value = weight.toFixed(1);
+
+          // 측정 모드 종료 이벤트 전송 (하드웨어에 알림)
+          try {
+            await fetch(`/devices/api/${deviceId}/measure-stop`, {
+              method: 'POST'
+            });
+            console.log('✅ 측정 모드 종료 이벤트 전송 완료');
+          } catch (stopError) {
+            console.error('⚠️ 측정 종료 이벤트 전송 실패 (무시 가능):', stopError);
+          }
+
+          modalBody.innerHTML = `
+            <p class="modal-status" style="color: var(--color-success); font-weight: var(--font-weight-semibold);">
+              ✅ 저장이 완료되었습니다!
+            </p>
+            <div class="weight-display">
+              <span class="weight-value">${weight.toFixed(1)}</span>
+              <span class="weight-unit">g</span>
+            </div>
+            <p class="modal-status">
+              분유통 무게가 성공적으로 등록되었습니다.
+            </p>
+            <div class="modal-actions">
+              <button class="btn btn-primary" onclick="closeModal()">확인</button>
+            </div>
+          `;
+        } else {
+          throw new Error(result.error);
+        }
+      } catch (error) {
+        console.error('Save error:', error);
+        modalBody.innerHTML = `
+          <p class="modal-status" style="color: var(--color-error);">
+            ❌ 저장 중 오류가 발생했습니다.<br>
+            ${error.message}
+          </p>
+          <div class="modal-actions">
+            <button class="btn btn-primary" onclick="closeModal()">확인</button>
+          </div>
+        `;
+      }
+    }
+
+    /**
+     * 모달 닫기
+     */
+    function closeModal() {
+      const modal = document.getElementById('measureModal');
+      modal.classList.remove('active');
+
+      if (measureInterval) {
+        clearInterval(measureInterval);
+        measureInterval = null;
+      }
+      weightHistory = [];
+    }
+
+    // 모달 배경 클릭 시 닫기
+    document.getElementById('measureModal').addEventListener('click', (e) => {
+      if (e.target.id === 'measureModal') {
+        closeModal();
+      }
+    });
+  </script>
+</body>
+</html>
