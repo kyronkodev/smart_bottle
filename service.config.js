@@ -3,7 +3,7 @@ module.exports = {
         {
             name: 'smart-bottle-dev',
             script: 'bin/www',
-            instances: 2,
+            instances: 1,
             exec_mode: 'cluster',
             listen_timeout: 50000,
             kill_timeout: 5000,
@@ -21,7 +21,7 @@ module.exports = {
         {
             name: 'smart-bottle-prod',
             script: 'bin/www',
-            instances: 5,
+            instances: 1,
             exec_mode: 'cluster',
             listen_timeout: 50000,
             kill_timeout: 5000,
